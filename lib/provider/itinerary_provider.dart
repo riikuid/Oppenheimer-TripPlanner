@@ -1,9 +1,11 @@
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:csv/csv.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:iterasi1/model/activity.dart';
 import 'package:iterasi1/model/day.dart';
 import 'package:iterasi1/model/itinerary.dart';
@@ -154,89 +156,145 @@ class ItineraryProvider extends ChangeNotifier {
     return activity.images!;
   }
 
-  Future<List<Itinerary>> parseCsvToItinerary(
+  Future<List<Itinerary>> parseJsonToItinerary(
       String asal, String tujuan, int jumlahHari) async {
-    // Membaca file CSV dari perangkat
-    log('message');
-    File file = File('assets/pepekk.csv');
-    if (await file.exists()) {
-      log('File ditemukan cokkkk');
-    } else {
-      log('File tidak ditemukan di path: prepekkk');
-    }
-    String csvString = await file.readAsString();
+    // Baca file JSON dari assets
+    final rawData = await rootBundle.loadString('assets/data.json');
 
-    // Parse CSV
-    List<List<dynamic>> rows = const CsvToListConverter().convert(csvString);
+    // Parse JSON
+    Map<String, dynamic> jsonData = jsonDecode(rawData);
+    List<dynamic> itinerariesJson = jsonData['itineraries'];
 
-    late Itinerary recommendation1;
-    late Itinerary recommendation2;
+    List<Itinerary> itineraries = [];
 
-    // Menentukan indeks kolom berdasarkan jumlahHari
-    int startRowIndex =
-        (jumlahHari - 1) * 2 + 2; // Logika untuk memilih row yang sesuai
+    // Gabungkan asal dan tujuan menjadi satu string format "asal-tujuan"
+    String asalTujuan = "$asal-$tujuan";
 
-    // Loop melalui baris-baris data CSV
-    for (var row in rows) {
-      String lokasiBerangkat = row[0] ?? ''; // Lokasi Berangkat
-      String lokasiTujuan = row[1] ?? ''; // Lokasi Tujuan
+    // Loop untuk mencari kecocokan lokasi di JSON
+    for (var itineraryJson in itinerariesJson) {
+      String location = itineraryJson['ASAL'];
 
-      // Pastikan kecocokan antara asal dan tujuan
-      if (lokasiBerangkat == asal && lokasiTujuan == tujuan) {
-        // Menentukan hasil itinerary yang sesuai berdasarkan jumlahHari
-        String hasilItinerary1 = row[startRowIndex] ??
-            ''; // Hasil rekomendasi 1 (row[2], row[4], row[6])
-        String hasilItinerary2 = row[startRowIndex + 1] ??
-            ''; // Hasil rekomendasi 2 (row[3], row[5], row[7])
+      // Cek apakah lokasi dalam format asal-tujuan cocok
+      if (asalTujuan == location) {
+        String hasilItineraryKeyA = 'HASIL ${jumlahHari} HARI - A';
+        String hasilItineraryKeyB = 'HASIL ${jumlahHari} HARI - B';
+
+        // Mengambil hasil itinerary yang sesuai berdasarkan jumlahHari
+        String hasilItinerary1 = itineraryJson[hasilItineraryKeyA] ?? '';
+        String hasilItinerary2 = itineraryJson[hasilItineraryKeyB] ?? '';
 
         // Pisahkan hasil itinerary menjadi List<Day>
-        var days1 = splitItineraryToDays(hasilItinerary1);
-        var days2 = splitItineraryToDays(hasilItinerary2);
+        List<Day> days1 = splitItineraryToDays(hasilItinerary1);
+        List<Day> days2 = splitItineraryToDays(hasilItinerary2);
 
-        // Simpan hasil rekomendasi ke dalam list yang sesuai
-        recommendation1 = Itinerary(
-          title: 'Rekomendasi 1',
+        // Menambahkan itinerary pertama dan kedua
+        itineraries.add(Itinerary(
+          title: 'Rekomendasi A',
           dateModified: DateTime.now().toString(),
           days: days1,
-        );
-        recommendation2 = Itinerary(
-          title: 'Rekomendasi 2',
+        ));
+
+        itineraries.add(Itinerary(
+          title: 'Rekomendasi B',
           dateModified: DateTime.now().toString(),
           days: days2,
-        );
+        ));
       }
     }
 
-    List<Itinerary> result = [recommendation1, recommendation2];
-
-    // Mengembalikan hasil rekomendasi 1 dan rekomendasi 2 dalam bentuk List<Day>
-    return result;
+    return itineraries;
   }
+
+  // Future<List<Itinerary>> parseCsvToItinerary(
+  //     String asal, String tujuan, int jumlahHari) async {
+  //   final rawData = await rootBundle.loadString('assets/puqi.csv');
+
+  //   // Parse CSV
+  //   List<List<dynamic>> rows = const CsvToListConverter().convert(rawData);
+
+  //   Itinerary recommendation1 = Itinerary(
+  //     title: 'Rekomendasi 1',
+  //     dateModified: DateTime.now().toString(),
+  //     days: [],
+  //   );
+
+  //   Itinerary recommendation2 = Itinerary(
+  //     title: 'Rekomendasi 2',
+  //     dateModified: DateTime.now().toString(),
+  //     days: [],
+  //   );
+
+  //   // Menentukan indeks kolom berdasarkan jumlahHari
+  //   int startRowIndex =
+  //       (jumlahHari - 1) * 2 + 1; // Logika untuk memilih row yang sesuai
+
+  //   // Gabungkan asal dan tujuan menjadi satu string format "asal-tujuan"
+  //   String asalTujuan = "$asal-$tujuan";
+
+  //   log(rows[2][2]);
+  //   // Loop melalui baris-baris data CSV
+  //   for (var row in rows) {
+  //     // Loop untuk mencocokkan kolom 0, 7, 14, dst
+  //     for (int i = 0; i < row.length; i++) {
+  //       // Cek apakah index i adalah lokasi asal-tujuan (kolom 0, 7, 14, dst)
+  //       if (i % 7 == 0) {
+  //         String lokasiTujuan =
+  //             row[i] ?? ''; // Lokasi - Tujuan pada kolom pertama
+
+  //         // Pastikan kecocokan antara asal dan tujuan dalam format "asal-tujuan"
+  //         if (asalTujuan == lokasiTujuan) {
+  //           // Menentukan hasil itinerary yang sesuai berdasarkan jumlahHari
+  //           String hasilItinerary1 =
+  //               row[startRowIndex] ?? ''; // Hasil rekomendasi 1
+  //           String hasilItinerary2 =
+  //               row[startRowIndex + 1] ?? ''; // Hasil rekomendasi 2
+
+  //           // Pisahkan hasil itinerary menjadi List<Day>
+  //           List<Day> days1 = splitItineraryToDays(hasilItinerary1);
+  //           List<Day> days2 = splitItineraryToDays(hasilItinerary2);
+
+  //           // Simpan hasil rekomendasi ke dalam list yang sesuai
+  //           recommendation1.days = days1;
+  //           recommendation2.days = days2;
+  //         }
+  //       }
+  //     }
+  //   }
+
+  //   log(recommendation1.days.length.toString());
+  //   List<Itinerary> result = [recommendation1, recommendation2];
+
+  //   // Mengembalikan hasil rekomendasi 1 dan 2 dalam bentuk List<Day>
+  //   return result;
+  // }
 
   List<Day> splitItineraryToDays(String itinerary) {
     List<Day> days = [];
 
-    final dayRegex = RegExp(
-        r'HARI KE-(\d+)[\s\S]+?((?:Judul: [\s\S]+?Estimasi Selesai: [\s\S]+?)+)',
-        caseSensitive: false);
+    // Pisahkan berdasarkan HARI KE-X (menggunakan regex untuk menangkap setiap hari)
+    final dayRegex =
+        RegExp(r'HARI KE-(\d+)[\s\S]+?(?=HARI KE-\d+|$)', caseSensitive: false);
     final matches = dayRegex.allMatches(itinerary);
 
     for (final match in matches) {
-      final dayActivitiesText = match.group(2) ?? '';
+      final dayActivitiesText = match.group(0) ?? '';
+
+      // Pisahkan setiap aktivitas dalam hari ini dengan regex yang lebih spesifik
       final activityRegex = RegExp(
-        r'Judul: (.?)\nMulai: (.?)\nEstimasi Selesai: (.?)\nTempat: (.?)\nInformasi Tambahan: (.*?)\n',
-        caseSensitive: false,
-      );
+          r'Judul: (.*?)\nMulai: (.*?)\nEstimasi Selesai: (.*?)\nTempat: (.*?)\nInformasi Tambahan: (.*?)\n',
+          caseSensitive: false);
 
       List<Activity> activities = [];
       final activityMatches = activityRegex.allMatches(dayActivitiesText);
+
+      // Proses setiap aktivitas
       for (final activityMatch in activityMatches) {
         final activityName = activityMatch.group(1)?.trim() ?? '';
         final startActivityTime = activityMatch.group(2)?.trim() ?? '';
         final endActivityTime = activityMatch.group(3)?.trim() ?? '';
         final lokasi = activityMatch.group(4)?.trim() ?? '';
         final keterangan = activityMatch.group(5)?.trim() ?? '';
-
+        // log('cok $activityName');
         Activity activity = Activity(
           activityName: activityName,
           startActivityTime: startActivityTime,
@@ -247,6 +305,7 @@ class ItineraryProvider extends ChangeNotifier {
         activities.add(activity);
       }
 
+      // Menggunakan nama hari berdasarkan urutan
       String dayName = 'HARI KE-${days.length + 1}';
       days.add(Day(date: dayName, activities: activities));
     }

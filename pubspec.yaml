@@ -123,7 +123,7 @@ flutter:
 
   assets:
     - assets/images/
-    - assets/pepekk.csv
+    - assets/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

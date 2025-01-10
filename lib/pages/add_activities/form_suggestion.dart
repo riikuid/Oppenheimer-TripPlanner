@@ -1,6 +1,8 @@
 import 'dart:developer';
 
+import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:iterasi1/model/itinerary.dart';
 import 'package:iterasi1/pages/add_activities/suggestion_itinerary.dart';
 import 'package:iterasi1/provider/itinerary_provider.dart';
@@ -180,9 +182,14 @@ class FormSuggestionState extends State<FormSuggestion> {
                             _selectedDestinationLocation != null)
                         ? () async {
                             log('message');
+                            // final _rawData = await rootBundle
+                            //     .loadString('assets/pepekk.csv');
+                            // List<List<dynamic>> _listData =
+                            //     CsvToListConverter().convert(_rawData);
+                            // log("DATA CSV $_listData");
                             List<Itinerary> result = await context
                                 .read<ItineraryProvider>()
-                                .parseCsvToItinerary(
+                                .parseJsonToItinerary(
                                     _selectedDepartureLocation!,
                                     _selectedDestinationLocation!,
                                     widget.selectedDays.length);
