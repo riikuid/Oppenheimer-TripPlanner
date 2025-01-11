@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:iterasi1/resource/custom_colors.dart';
 
@@ -114,6 +116,8 @@ class _AddActivitiesState extends State<AddActivities> {
       keterangan: keteranganController.text,
       removedImages: widget.initialActivity?.removedImages,
     );
+
+    log(_selectedStartTime.format(context));
 
     widget.onSubmit(newActivity);
     Navigator.of(context).pop();

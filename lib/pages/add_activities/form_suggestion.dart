@@ -193,10 +193,13 @@ class FormSuggestionState extends State<FormSuggestion> {
                                     _selectedDepartureLocation!,
                                     _selectedDestinationLocation!,
                                     widget.selectedDays.length);
+                            Navigator.pop(context);
                             Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (context) =>
-                                    SuggestionItinerary(itineraries: result),
+                                builder: (context) => SuggestionItinerary(
+                                  itineraries: result,
+                                  selectedDays: widget.selectedDays,
+                                ),
                               ),
                             );
                           }

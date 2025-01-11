@@ -199,11 +199,12 @@ class _SelectDateState extends State<SelectDate> {
                         ),
                         onPressed: () {
                           if (selectedDates.isNotEmpty) {
-                            itineraryProvider.initializeDays(selectedDates);
+                            // itineraryProvider.initializeDays(selectedDates);
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) =>  FormSuggestion(selectedDays: selectedDates,
+                                builder: (context) => FormSuggestion(
+                                  selectedDays: selectedDates,
                                   // onSubmit: (Activity newActivity) {
                                   //   // Implementasikan logika setelah aktivitas disubmit
                                   //   print(

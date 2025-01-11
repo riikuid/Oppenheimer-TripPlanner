@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:iterasi1/model/day.dart';
+import 'package:iterasi1/utilities/date_time_formatter.dart';
+import 'package:provider/provider.dart';
 import 'package:iterasi1/model/activity.dart';
 import 'package:iterasi1/model/itinerary.dart';
 import 'package:iterasi1/pages/add_days/add_days.dart';
+import 'package:iterasi1/provider/itinerary_provider.dart';
 import 'package:iterasi1/resource/custom_colors.dart';
 
 class SuggestionItinerary extends StatefulWidget {
   final List<Itinerary> itineraries;
-  const SuggestionItinerary({super.key, required this.itineraries});
+  final List<DateTime> selectedDays;
+  const SuggestionItinerary(
+      {super.key, required this.itineraries, required this.selectedDays});
 
   @override
   _SuggestionItineraryState createState() => _SuggestionItineraryState();
@@ -58,9 +64,10 @@ class _SuggestionItineraryState extends State<SuggestionItinerary>
             child: TabBarView(
               controller: _tabController,
               children: [
-                _buildItineraryContent(index: 0),
+                _buildItineraryContent(index: _tabController.index),
                 _buildItineraryContent(
-                    index: 1), // Ganti konten jika diperlukan
+                    index:
+                        _tabController.index), // Ganti konten jika diperlukan
               ],
             ),
           ),
@@ -76,6 +83,16 @@ class _SuggestionItineraryState extends State<SuggestionItinerary>
                 minimumSize: const Size(double.infinity, 48),
               ),
               onPressed: () {
+                for (var i = 0; i < widget.selectedDays.length; i++) {
+                  String date = DateTimeFormatter.toDMY(widget.selectedDays[i],
+                      separator: "/");
+                  Day newDay = Day(
+                    date: date,
+                    activities: widget
+                        .itineraries[_tabController.index].days[i].activities,
+                  );
+                  context.read<ItineraryProvider>().addDay(newDay);
+                }
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) => const AddDays(),
@@ -133,36 +150,6 @@ class _SuggestionItineraryState extends State<SuggestionItinerary>
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    // Stack(
-                    //   children: [
-                    //     Padding(
-                    //       padding: const EdgeInsets.all(12.0),
-                    //       child: Align(
-                    //         alignment: Alignment.topRight,
-                    //         child: InkWell(
-                    //           onTap: () {
-                    //             print('activity:${activity.startDateTime}');
-                    //             print(
-                    //                 'activity:${activity.startActivityTime}');
-                    //             (
-                    //                 activity); // Kirim activity sebagai argument
-                    //           },
-                    //           child: Transform.scale(
-                    //             scale: 1.8, // ukuran gambar
-                    //             child: const Image(
-                    //               width: 30,
-                    //               height: 30,
-                    //               color: CustomColor.surface,
-                    //               image: AssetImage(
-                    //                 'assets/images/gallery-favorite.png',
-                    //               ),
-                    //             ),
-                    //           ),
-                    //         ),
-                    //       ),
-                    //     ),
-                    //   ],
-                    // ),
                   ],
                 ),
                 Column(
@@ -255,7 +242,7 @@ class _SuggestionItineraryState extends State<SuggestionItinerary>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'HARI KE-${indexDay + 1}',
+                'HARI KE-${indexDay + 1}, ${widget.selectedDays[indexDay]}',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,

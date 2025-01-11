@@ -64,7 +64,7 @@ class ItineraryProvider extends ChangeNotifier {
     }
 
     _itinerary.days = finalDays;
-    print('final : ${_itinerary.days[0].date}');
+    log('final : ${_itinerary.days[0].date}');
 
     notifyListeners();
   }
@@ -176,8 +176,8 @@ class ItineraryProvider extends ChangeNotifier {
 
       // Cek apakah lokasi dalam format asal-tujuan cocok
       if (asalTujuan == location) {
-        String hasilItineraryKeyA = 'HASIL ${jumlahHari} HARI - A';
-        String hasilItineraryKeyB = 'HASIL ${jumlahHari} HARI - B';
+        String hasilItineraryKeyA = 'HASIL $jumlahHari HARI - A';
+        String hasilItineraryKeyB = 'HASIL $jumlahHari HARI - B';
 
         // Mengambil hasil itinerary yang sesuai berdasarkan jumlahHari
         String hasilItinerary1 = itineraryJson[hasilItineraryKeyA] ?? '';
@@ -204,69 +204,6 @@ class ItineraryProvider extends ChangeNotifier {
 
     return itineraries;
   }
-
-  // Future<List<Itinerary>> parseCsvToItinerary(
-  //     String asal, String tujuan, int jumlahHari) async {
-  //   final rawData = await rootBundle.loadString('assets/puqi.csv');
-
-  //   // Parse CSV
-  //   List<List<dynamic>> rows = const CsvToListConverter().convert(rawData);
-
-  //   Itinerary recommendation1 = Itinerary(
-  //     title: 'Rekomendasi 1',
-  //     dateModified: DateTime.now().toString(),
-  //     days: [],
-  //   );
-
-  //   Itinerary recommendation2 = Itinerary(
-  //     title: 'Rekomendasi 2',
-  //     dateModified: DateTime.now().toString(),
-  //     days: [],
-  //   );
-
-  //   // Menentukan indeks kolom berdasarkan jumlahHari
-  //   int startRowIndex =
-  //       (jumlahHari - 1) * 2 + 1; // Logika untuk memilih row yang sesuai
-
-  //   // Gabungkan asal dan tujuan menjadi satu string format "asal-tujuan"
-  //   String asalTujuan = "$asal-$tujuan";
-
-  //   log(rows[2][2]);
-  //   // Loop melalui baris-baris data CSV
-  //   for (var row in rows) {
-  //     // Loop untuk mencocokkan kolom 0, 7, 14, dst
-  //     for (int i = 0; i < row.length; i++) {
-  //       // Cek apakah index i adalah lokasi asal-tujuan (kolom 0, 7, 14, dst)
-  //       if (i % 7 == 0) {
-  //         String lokasiTujuan =
-  //             row[i] ?? ''; // Lokasi - Tujuan pada kolom pertama
-
-  //         // Pastikan kecocokan antara asal dan tujuan dalam format "asal-tujuan"
-  //         if (asalTujuan == lokasiTujuan) {
-  //           // Menentukan hasil itinerary yang sesuai berdasarkan jumlahHari
-  //           String hasilItinerary1 =
-  //               row[startRowIndex] ?? ''; // Hasil rekomendasi 1
-  //           String hasilItinerary2 =
-  //               row[startRowIndex + 1] ?? ''; // Hasil rekomendasi 2
-
-  //           // Pisahkan hasil itinerary menjadi List<Day>
-  //           List<Day> days1 = splitItineraryToDays(hasilItinerary1);
-  //           List<Day> days2 = splitItineraryToDays(hasilItinerary2);
-
-  //           // Simpan hasil rekomendasi ke dalam list yang sesuai
-  //           recommendation1.days = days1;
-  //           recommendation2.days = days2;
-  //         }
-  //       }
-  //     }
-  //   }
-
-  //   log(recommendation1.days.length.toString());
-  //   List<Itinerary> result = [recommendation1, recommendation2];
-
-  //   // Mengembalikan hasil rekomendasi 1 dan 2 dalam bentuk List<Day>
-  //   return result;
-  // }
 
   List<Day> splitItineraryToDays(String itinerary) {
     List<Day> days = [];
@@ -297,12 +234,13 @@ class ItineraryProvider extends ChangeNotifier {
         // log('cok $activityName');
         Activity activity = Activity(
           activityName: activityName,
-          startActivityTime: startActivityTime,
-          endActivityTime: endActivityTime,
+          startActivityTime: convertTo12HourFormat(startActivityTime),
+          endActivityTime: convertTo12HourFormat(endActivityTime),
           lokasi: lokasi,
           keterangan: keterangan,
         );
         activities.add(activity);
+        log(activity.startActivityTime);
       }
 
       // Menggunakan nama hari berdasarkan urutan
@@ -311,5 +249,33 @@ class ItineraryProvider extends ChangeNotifier {
     }
 
     return days;
+  }
+
+  String convertTo12HourFormat(String time) {
+    // Pisahkan jam dan menit
+    List<String> parts = time.split('.');
+    int hour = int.parse(parts[0]);
+    String minutes = parts[1];
+
+    // Tentukan AM atau PM
+    String period = hour >= 12 ? 'PM' : 'AM';
+
+    // Ubah jam ke format 12 jam
+    hour = hour % 12;
+    if (hour == 0) {
+      hour = 12; // Jam 0 harus menjadi 12 pada format 12 jam
+    }
+
+    // Format waktu dengan AM/PM tanpa angka nol di depan
+    return '$hour:$minutes $period';
+  }
+
+  void main() {
+    // Contoh penggunaan
+    String time1 = '06.00'; // Output: 6:00 AM
+    String time2 = '19.30'; // Output: 7:30 PM
+
+    print(convertTo12HourFormat(time1)); // 6:00 AM
+    print(convertTo12HourFormat(time2)); // 7:30 PM
   }
 }

@@ -240,8 +240,8 @@ class _AddDaysState extends State<AddDays> {
                                     final currentActivity = data[index].copy();
                                     print(
                                         'activity card : ${data[index].startDateTime}');
-                                    print(
-                                        'activity card : ${data[index].startActivityTime}');
+                                    // print(
+                                    //     'activity card : ${data[index].startActivityTime}');
                                     return buildActivityCard(
                                       context,
                                       data[index],
