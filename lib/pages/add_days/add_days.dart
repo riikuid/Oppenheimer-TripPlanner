@@ -193,6 +193,7 @@ class _AddDaysState extends State<AddDays> {
                                   MaterialPageRoute(
                                     builder: (context) {
                                       return SelectDate(
+                                        isNewItinerary: false,
                                         initialDates: itineraryProvider
                                             .itinerary.days
                                             .map((e) => e.getDatetime())

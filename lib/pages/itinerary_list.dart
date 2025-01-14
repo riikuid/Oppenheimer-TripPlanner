@@ -401,7 +401,9 @@ class _ItineraryListState extends State<ItineraryList> {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) {
-              return SelectDate();
+              return SelectDate(
+                isNewItinerary: true,
+              );
             },
           ),
         );

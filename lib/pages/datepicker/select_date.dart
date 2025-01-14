@@ -12,8 +12,11 @@ import '../../provider/itinerary_provider.dart';
 
 // ignore: must_be_immutable
 class SelectDate extends StatefulWidget {
+  final bool isNewItinerary;
   List<DateTime> initialDates;
-  SelectDate({Key? key, this.initialDates = const []}) : super(key: key);
+  SelectDate(
+      {Key? key, this.initialDates = const [], required this.isNewItinerary})
+      : super(key: key);
 
   @override
   State<SelectDate> createState() => _SelectDateState();
@@ -171,59 +174,60 @@ class _SelectDateState extends State<SelectDate> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Expanded(
-                      child: FilledButton(
-                        style: const ButtonStyle(
-                          backgroundColor: WidgetStatePropertyAll(
-                            CustomColor.buttonColor,
-                          ),
-                          padding: WidgetStatePropertyAll(
-                            EdgeInsets.symmetric(vertical: 20),
-                          ),
-                          shape: WidgetStatePropertyAll(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(20),
+                    if (widget.isNewItinerary)
+                      Expanded(
+                        child: FilledButton(
+                          style: const ButtonStyle(
+                            backgroundColor: WidgetStatePropertyAll(
+                              CustomColor.buttonColor,
+                            ),
+                            padding: WidgetStatePropertyAll(
+                              EdgeInsets.symmetric(vertical: 20),
+                            ),
+                            shape: WidgetStatePropertyAll(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(20),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        child: const Text(
-                          'Rekomendasi Itinerary',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: 'poppins_bold',
-                            fontSize: 16,
-                            color: Colors.white,
+                          child: const Text(
+                            'Rekomendasi Itinerary',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: 'poppins_bold',
+                              fontSize: 16,
+                              color: Colors.white,
+                            ),
                           ),
-                        ),
-                        onPressed: () {
-                          if (selectedDates.isNotEmpty) {
-                            // itineraryProvider.initializeDays(selectedDates);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => FormSuggestion(
-                                  selectedDays: selectedDates,
-                                  // onSubmit: (Activity newActivity) {
-                                  //   // Implementasikan logika setelah aktivitas disubmit
-                                  //   print(
-                                  //       'Aktivitas Baru: ${newActivity.activityName}');
-                                  // },
+                          onPressed: () {
+                            if (selectedDates.isNotEmpty) {
+                              // itineraryProvider.initializeDays(selectedDates);
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => FormSuggestion(
+                                    selectedDays: selectedDates,
+                                    // onSubmit: (Activity newActivity) {
+                                    //   // Implementasikan logika setelah aktivitas disubmit
+                                    //   print(
+                                    //       'Aktivitas Baru: ${newActivity.activityName}');
+                                    // },
+                                  ),
                                 ),
-                              ),
-                            );
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content:
-                                    Text("Pilih Tanggal setelah Hari Ini!"),
-                              ),
-                            );
-                          }
-                        },
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content:
+                                      Text("Pilih Tanggal setelah Hari Ini!"),
+                                ),
+                              );
+                            }
+                          },
+                        ),
                       ),
-                    ),
                     const SizedBox(width: 20),
                     Expanded(
                       child: FilledButton(
@@ -242,10 +246,12 @@ class _SelectDateState extends State<SelectDate> {
                             ),
                           ),
                         ),
-                        child: const Text(
-                          'Self Planning',
+                        child: Text(
+                          widget.isNewItinerary
+                              ? 'Self Planning'
+                              : 'Selanjutnya',
                           textAlign: TextAlign.center,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontFamily: 'poppins_bold',
                             fontSize: 16,
                             color: Colors.white,
